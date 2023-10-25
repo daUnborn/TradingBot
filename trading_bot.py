@@ -92,11 +92,11 @@ def trading_job():
 
     previous_candleR = abs(dfstream['High'].iloc[-2] - dfstream['Low'].iloc[-2])
 
-    SLBuy = float(str(candle.bid.o)) - 0.0005  # 5 pips as Stop Loss
-    SLSell = float(str(candle.bid.o)) + 0.0005  # 5 pips as Stop Loss
+    SLBuy = float(str(candle.bid.o)) - 0.0008  # 5 pips as Stop Loss
+    SLSell = float(str(candle.bid.o)) + 0.0008  # 5 pips as Stop Loss
 
-    TPBuy = float(str(candle.bid.o)) + 0.0020  # 50 pips as Take Profit
-    TPSell = float(str(candle.bid.o)) - 0.0020  # 50 pips as Take Profit
+    TPBuy = float(str(candle.bid.o)) + 0.0080  # 50 pips as Take Profit
+    TPSell = float(str(candle.bid.o)) - 0.0080  # 50 pips as Take Profit
 
     if signal == 1:
         print('buy market order executed')
@@ -113,7 +113,7 @@ def trading_job():
         rv = client.request(r)
         print(json.dumps(rv, indent=4))
 
-    print("Job executed successfully!\n==============================")
+    print("Job executed successfully!\n================================")
     
 #trading_job()
 scheduler = BlockingScheduler()
