@@ -18,8 +18,13 @@ import pandas as pd
 import datetime
 import json
 
-access_token = 'token'
+access_token = '' 
+# 2c0dac5d047d822e
+# fd0d4058af8b1973
+# -b8b1e17acd17fb9bddd0b53adae9ae5f
+
 accountID = "id"  # Your account ID here
+# 101-004-26226167-002
 client = API(access_token)
 
 def calculate_sma(data, period):
