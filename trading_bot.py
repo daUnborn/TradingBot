@@ -65,7 +65,7 @@ def get_candles(n):
         print('Connection to API failed')
         sys.exit(1) 
         
-    collector = client.get_collector(Pair.GBP_CAD, Gran.M5)
+    collector = client.get_collector(Pair.GBP_CAD, Gran.H1)
     candles = collector.grab(n)
     return candles
 
@@ -92,23 +92,23 @@ def trading_job():
 
     previous_candleR = abs(dfstream['High'].iloc[-2] - dfstream['Low'].iloc[-2])
 
-    SLBuy = float(str(candle.bid.o)) - 0.0008  # 5 pips as Stop Loss
-    SLSell = float(str(candle.bid.o)) + 0.0008  # 5 pips as Stop Loss
+    SLBuy = float(str(candle.bid.o)) - 0.0005  # 5 pips as Stop Loss
+    SLSell = float(str(candle.bid.o)) + 0.0005  # 5 pips as Stop Loss
 
-    TPBuy = float(str(candle.bid.o)) + 0.0080  # 50 pips as Take Profit
-    TPSell = float(str(candle.bid.o)) - 0.0080  # 50 pips as Take Profit
+    TPBuy = float(str(candle.bid.o)) + 0.0050  # 50 pips as Take Profit
+    TPSell = float(str(candle.bid.o)) - 0.0050  # 50 pips as Take Profit
 
     if signal == 1:
         print('buy market order executed')
         print(f'TP Buy: {TPBuy}\nSL Buy: {SLBuy}')
-        mo = MarketOrderRequest(instrument="GBP_CAD", units=1000, takeProfitOnFill=TakeProfitDetails(price=TPBuy).data, stopLossOnFill=StopLossDetails(price=SLBuy).data)
+        mo = MarketOrderRequest(instrument="GBP_CAD", units=10000, takeProfitOnFill=TakeProfitDetails(price=TPBuy).data, stopLossOnFill=StopLossDetails(price=SLBuy).data)
         r = orders.OrderCreate(accountID, data=mo.data)
         rv = client.request(r)
         print(json.dumps(rv, indent=4))
     elif signal == 2:
         print('sell market order executed')
         print(f'TP Sell: {TPSell}\nSL Sell: {SLSell}')
-        mo = MarketOrderRequest(instrument="GBP_CAD", units=-1000, takeProfitOnFill=TakeProfitDetails(price=TPSell).data, stopLossOnFill=StopLossDetails(price=SLSell).data)
+        mo = MarketOrderRequest(instrument="GBP_CAD", units=-10000, takeProfitOnFill=TakeProfitDetails(price=TPSell).data, stopLossOnFill=StopLossDetails(price=SLSell).data)
         r = orders.OrderCreate(accountID, data=mo.data)
         rv = client.request(r)
         print(json.dumps(rv, indent=4))
@@ -117,5 +117,5 @@ def trading_job():
     
 #trading_job()
 scheduler = BlockingScheduler()
-scheduler.add_job(trading_job, 'interval', minutes=5)
+scheduler.add_job(trading_job, 'cron', day_of_week='mon-fri', hour='00-23', minute='1', start_date='2023-10-30 00:01:00', timezone='Europe/London')
 scheduler.start()
