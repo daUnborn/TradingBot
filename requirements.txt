@@ -1,4 +1,4 @@
-apscheduler==3.8.2
+apscheduler==3.10.4
 oandapyV20==0.7.3
 oanda-candles==1.1.0
 yfinance==0.1.70
