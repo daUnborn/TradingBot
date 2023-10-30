@@ -1,5 +1,6 @@
-apscheduler==3.10.4
+apscheduler==3.10.1
 oandapyV20==0.7.3
-oanda-candles==1.1.0
+oanda-candles==0.1.0
 yfinance==0.1.70
 pandas==1.3.3
+sendgrid=9.28.1

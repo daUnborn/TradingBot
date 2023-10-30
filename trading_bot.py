@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct 25 19:10:48 2023
-
-@author: camaike
-"""
-
 from apscheduler.schedulers.blocking import BlockingScheduler
 from oandapyV20 import API
 import oandapyV20.endpoints.orders as orders
@@ -17,15 +9,34 @@ import yfinance as yf
 import pandas as pd
 import datetime
 import json
+import sendgrid
+import os
+from sendgrid.helpers.mail import Mail, Email, To, Content
 
-access_token = '' 
-# 2c0dac5d047d822e
-# fd0d4058af8b1973
-# -b8b1e17acd17fb9bddd0b53adae9ae5f
+access_token = ''
+#2c0dac5d047d822efd0d4058af8b1973-b8b1e17acd17fb9bddd0b53adae9ae5f'
 
-accountID = "id"  # Your account ID here
+accountID = ''
+#101-004-26226167-002' # Your account ID here
 # 101-004-26226167-002
+sendgrid_api_key = ''
+#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'
+
 client = API(access_token)
+
+def trigger_email(message_body, ticker, timeframe):
+    sg = sendgrid.SendGridAPIClient(sendgrid_api_key)
+    from_email = Email("chimaroke.amaike@gmail.com")  # Change to your verified sender
+    to_email = To("chimamails@gmail.com")  # Change to your recipient
+    subject = f"TradingBot Alert of {ticker} on {timeframe} timeframe"
+    content = Content("text/plain", message_body)
+    mail = Mail(from_email, to_email, subject, content)
+
+    # Get a JSON-ready representation of the Mail object
+    mail_json = mail.get()
+
+    # Send an HTTP POST request to /mail/send
+    response = sg.client.mail.send.post(request_body=mail_json)
 
 def calculate_sma(data, period):
     return data['Close'].rolling(window=period).mean()
@@ -104,15 +115,20 @@ def trading_job():
     TPSell = float(str(candle.bid.o)) - 0.0050  # 50 pips as Take Profit
 
     if signal == 1:
-        print('buy market order executed')
-        print(f'TP Buy: {TPBuy}\nSL Buy: {SLBuy}')
         mo = MarketOrderRequest(instrument="GBP_CAD", units=10000, takeProfitOnFill=TakeProfitDetails(price=TPBuy).data, stopLossOnFill=StopLossDetails(price=SLBuy).data)
         r = orders.OrderCreate(accountID, data=mo.data)
         rv = client.request(r)
-        print(json.dumps(rv, indent=4))
+        order_details = json.dumps(rv, indent=4)
+        
+        message_body = f'buy market order executed\nTP Buy: {TPBuy}\nSL Buy: {SLBuy}\n{order_details}'
+        print(message_body)
+        trigger_email(message_body, "GBP_CAD", 'H1')
+        
     elif signal == 2:
-        print('sell market order executed')
-        print(f'TP Sell: {TPSell}\nSL Sell: {SLSell}')
+        message_body = f'buy market order executed\nTP Sell: {TPSell}\nSL Sell: {SLSell}\n{order_details}'
+        print(message_body)
+        trigger_email(message_body, "GBP_CAD", 'H1')
+
         mo = MarketOrderRequest(instrument="GBP_CAD", units=-10000, takeProfitOnFill=TakeProfitDetails(price=TPSell).data, stopLossOnFill=StopLossDetails(price=SLSell).data)
         r = orders.OrderCreate(accountID, data=mo.data)
         rv = client.request(r)
@@ -124,3 +140,4 @@ def trading_job():
 scheduler = BlockingScheduler()
 scheduler.add_job(trading_job, 'cron', day_of_week='mon-fri', hour='00-23', minute='1', start_date='2023-10-30 00:01:00', timezone='Europe/London')
 scheduler.start()
+trigger_email('Scheduler running', "GBP_CAD", 'H1')
