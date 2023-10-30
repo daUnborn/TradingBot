@@ -134,7 +134,7 @@ def trading_job():
         rv = client.request(r)
         print(json.dumps(rv, indent=4))
 
-    print("Job executed successfully!\n================================")
+    print("Job executed successfully!\n==================================")
     
 #trading_job()
 scheduler = BlockingScheduler()
